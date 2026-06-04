@@ -27,8 +27,11 @@ app.get('/health', (req, res) => {
 });
 
 // Fallback route to serve index.html for any GET request
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/', (req, res) => {
+    res.json({
+        service: "WhisperNet BaseNode",
+        status: "running"
+    });
 });
 
 const server = http.createServer(app);
