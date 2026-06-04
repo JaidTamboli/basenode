@@ -347,23 +347,51 @@ io.on('connection', (socket) => {
 
     // Validate encryption edge cases
     if (encrypted && (!message || message.length === 0)) {
-      console.log(`Encrypted message but no content`);
-      if (ack) ack({ delivered: false, reason: 'Invalid encrypted message' });
-      return;
+        console.log('Encrypted message but no content');
+
+        if (ack) {
+            ack({
+                delivered: false,
+                reason: 'Invalid encrypted message'
+            });
+        }
+        return;
     }
 
     // Validate public key is provided when encryption is enabled
     if (encrypted && !publicKey) {
-      console.log(`Message marked encrypted but no public key provided`);
-      if (ack) ack({ delivered: false, reason: 'Public key required for encrypted messages' });
-      return;
+        console.log('Message marked encrypted but no public key provided');
+
+        if (ack) {
+            ack({
+                delivered: false,
+                reason: 'Public key required for encrypted messages'
+            });
+        }
+        return;
     }
 
-    // Validate public key format
-    if (publicKey && typeof publicKey !== 'object') {
-      console.log(`Invalid public key format`);
-      if (ack) ack({ delivered: false, reason: 'Invalid public key format' });
-      return;
+    // Accept BOTH:
+    // Web: JWK Object
+    // Android: Base64 RSA String
+    const validPublicKey =
+        publicKey === null ||
+        publicKey === undefined ||
+        typeof publicKey === 'object' ||
+        typeof publicKey === 'string';
+
+    if (!validPublicKey) {
+        console.log(
+            `Invalid public key format. Type: ${typeof publicKey}`
+        );
+
+        if (ack) {
+            ack({
+                delivered: false,
+                reason: 'Invalid public key format'
+            });
+        }
+        return;
     }
 
     console.log(`Direct message from ${fromUser.username} to ${to} ${encrypted ? '(encrypted)' : ''}`);
